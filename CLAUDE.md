@@ -31,6 +31,7 @@ Quando l'utente fornisce un'immagine (locandina, menù, orari) e un elemento OSM
 python osm_search.py "nome locale" --city "città"
 python osm_search.py "Bar Centrale" --city Milano --type node
 ```
+Puoi ricavare la cittá anche dagli exif GPS della foto o da un indirizzo visibile.
 
 Restituisce `type/id` da usare nei passi successivi.
 
