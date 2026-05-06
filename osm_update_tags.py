@@ -50,11 +50,11 @@ def fetch_element(elem_type: str, elem_id: int) -> dict:
 
 
 def create_changeset(comment: str, headers: dict) -> int:
-    comment = comment or "Tag update via osm_update_tags.py"
+    comment = comment or "Tag update via https://github.com/AlessandroLorenzi/openstreetmapskills"
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>'
         '<osm><changeset>'
-        f'<tag k="created_by" v="osm_update_tags.py"/>'
+        f'<tag k="created_by" v="https://github.com/AlessandroLorenzi/openstreetmapskills"/>'
         f'<tag k="comment" v="{comment}"/>'
         '</changeset></osm>'
     )
