@@ -53,7 +53,13 @@ Tag comuni da estrarre:
 - `website` — URL
 - `cuisine` — tipo di cucina (`italian`, `pizza`, `seafood`, ...)
 - `addr:street`, `addr:housenumber`, `addr:city`, `addr:postcode`
+- `contact:email` — email di contatto
+- `contact:facebook` — profilo Facebook
+- `contact:instagram` — profilo Instagram
+- `contact:twitter` — handle Twitter
 - `amenity` / `shop` / `tourism` — tipo di attività
+
+Altri tag specifici possono essere aggiunti se chiaramente indicati dalla fonte, ma evita di aggiungere tag non standard o non supportati.
 
 ### 3. Mostra il diff e chiedi conferma
 
