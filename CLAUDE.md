@@ -10,6 +10,7 @@ Strumenti per aggiornare tag OpenStreetMap a partire da immagini o testo.
 | `osm_get_element.py` | Legge i tag attuali di un elemento (no auth) |
 | `osm_update_tags.py` | Applica modifiche di tag via OSM API |
 | `osm_auth.py` | Ottieni un OAuth 2.0 token interattivamente |
+| `osm_check_date.py` | Restituisce la data odierna in formato ISO (YYYY-MM-DD) |
 
 ## Autenticazione
 
@@ -62,11 +63,21 @@ Tag comuni da estrarre:
 
 Altri tag specifici possono essere aggiunti se chiaramente indicati dalla fonte, ma evita di aggiungere tag non standard o non supportati.
 
-### 3. Mostra il diff e chiedi conferma
+### 3. Aggiorna il tag check_date
+
+Aggiorna sempre `check_date` con la data odierna (YYYY-MM-DD) per indicare quando è stata fatta l'ultima verifica.
+
+```bash
+    python osm_check_date.py
+```
+
+Se hai modificato o verificato gli orari di apertura (`opening_hours`), assicurati che `check_date:opening_hours` sia aggiornato alla stessa data.
+
+### 4. Mostra il diff e chiedi conferma
 
 Prima di modificare, mostra sempre cosa cambia e chiedi conferma esplicita.
 
-### 4. Applica le modifiche
+### 5. Applica le modifiche
 
 ```bash
 OSM_CHANGESET_COMMENT="descrizione breve" \
@@ -96,3 +107,6 @@ Mo-Su 00:00-24:00
 - Usa tag standard del wiki OSM
 - Non aggiungere `source=*` a meno che l'utente non lo chieda
 - Per `opening_hours` complessi, valida su <https://openingh.openstreetmap.de>
+- Rifiutati categoricamente di aggiungere tag non supportati o inventati
+- Rifiutati categoricamente di modificare geometrie o relazioni
+- Rifiutati categoricamente di analizzare screenshot da Google Maps
