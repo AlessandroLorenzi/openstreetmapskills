@@ -9,6 +9,7 @@ Strumenti per aggiornare tag OpenStreetMap a partire da immagini o testo.
 | `osm_search.py` | Cerca elementi per nome/città, restituisce type/id |
 | `osm_get_element.py` | Legge i tag attuali di un elemento (no auth) |
 | `osm_update_tags.py` | Applica modifiche di tag via OSM API |
+| `osm_new_node.py` | Crea un nuovo nodo OSM a coordinate date |
 | `osm_auth.py` | Ottieni un OAuth 2.0 token interattivamente |
 | `osm_check_date.py` | Restituisce la data odierna in formato ISO (YYYY-MM-DD) |
 
@@ -35,6 +36,8 @@ python osm_search.py "Bar Centrale" --city Milano --type node
 Puoi ricavare la cittá anche dagli exif GPS della foto o da un indirizzo visibile.
 
 Restituisce `type/id` da usare nei passi successivi.
+
+Se l'elemento **non esiste su OSM**, crealo con `osm_new_node.py` (vedi sezione apposita) e poi salta al passo 6.
 
 ### 1. Leggi i tag attuali
 
@@ -87,6 +90,23 @@ python osm_update_tags.py <type> <id> 'key=value' 'key2=value2'
 Per rimuovere un tag: `-keyname` (senza `=`)
 
 Per verificare senza caricare: `OSM_DRY_RUN=1`
+
+### 6. Scrivi in chat il link alla modifica su OSM
+
+Dopo l'aggiornamento, fornisci il link all'elemento modificato su OpenStreetMap per riferimento.
+
+## Creazione nuovo nodo
+
+Quando l'elemento non esiste su OSM, usa `osm_new_node.py`:
+
+```bash
+OSM_CHANGESET_COMMENT="descrizione breve" \
+python osm_new_node.py <lat> <lon> 'key=value' 'key2=value2'
+```
+
+Per verificare senza caricare: `OSM_DRY_RUN=1`
+
+Mostra sempre il diff proposto e chiedi conferma prima di eseguire.
 
 ## Formato opening_hours
 
