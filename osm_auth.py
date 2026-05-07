@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Ottieni un OAuth 2.0 access token per l'API OSM da riga di comando.
+"""Obtain an OAuth 2.0 access token for the OSM API from the command line.
 
-Passi preliminari (una volta sola):
-  1. Vai su https://www.openstreetmap.org/oauth2/applications
-  2. Clicca "Register new application"
-  3. Compila:
-       Name:         (qualsiasi, es. "claude-osm-cli")
+Prerequisites (one-time setup):
+  1. Go to https://www.openstreetmap.org/oauth2/applications
+  2. Click "Register new application"
+  3. Fill in:
+       Name:         (anything, e.g. "claude-osm-cli")
        Redirect URIs: urn:ietf:wg:oauth:2.0:oob
-       Scopes:       spunta "write_api"
-  4. Copia il Client ID (non serve il Client Secret per questa flow)
+       Scopes:       check "write_api"
+  4. Copy the Client ID (Client Secret is not needed for this flow)
 
-Uso:
+Usage:
   python osm_auth.py <client_id>
 
 Output:
-  Stampa il token da esportare come OSM_TOKEN
+  Prints the token to export as OSM_TOKEN
 """
 
 import sys
@@ -58,11 +58,11 @@ def main():
     }
 
     url = f"{AUTH_URL}?{urlencode(params)}"
-    print(f"\nApri questo URL nel browser (si apre automaticamente):\n\n  {url}\n")
+    print(f"\nOpen this URL in your browser (opens automatically):\n\n  {url}\n")
     webbrowser.open(url)
 
-    print("Dopo aver autorizzato l'app, OSM mostrerà un codice.")
-    code = input("Incolla qui il codice: ").strip()
+    print("After authorising the app, OSM will show you a code.")
+    code = input("Paste the code here: ").strip()
 
     data = urlencode({
         "client_id": client_id,
@@ -77,16 +77,16 @@ def main():
         with urlopen(req) as r:
             resp = json.loads(r.read())
     except HTTPError as e:
-        print(f"Errore {e.code}: {e.read().decode()}")
+        print(f"Error {e.code}: {e.read().decode()}")
         sys.exit(1)
 
     token = resp.get("access_token")
     if not token:
-        print(f"Risposta inattesa: {resp}")
+        print(f"Unexpected response: {resp}")
         sys.exit(1)
 
-    print(f"\nToken ottenuto! Esporta con:\n\n  export OSM_TOKEN=\"{token}\"\n")
-    print("Oppure aggiungilo a ~/.bashrc / ~/.zshrc per renderlo permanente.")
+    print(f"\nToken obtained! Export it with:\n\n  export OSM_TOKEN=\"{token}\"\n")
+    print("Or add it to ~/.bashrc / ~/.zshrc to make it permanent.")
 
 
 if __name__ == "__main__":

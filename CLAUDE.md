@@ -1,114 +1,114 @@
 # OSM Tag Updater
 
-Strumenti per aggiornare tag OpenStreetMap a partire da immagini o testo.
+Tools to update OpenStreetMap tags from images or text.
 
-## Script disponibili
+## Available scripts
 
-| Script | Uso |
+| Script | Purpose |
 | -------- | ----- |
-| `osm_search.py` | Cerca elementi per nome/città, restituisce type/id |
-| `osm_get_element.py` | Legge i tag attuali di un elemento (no auth) |
-| `osm_update_tags.py` | Applica modifiche di tag via OSM API |
-| `osm_new_node.py` | Crea un nuovo nodo OSM a coordinate date |
-| `osm_auth.py` | Ottieni un OAuth 2.0 token interattivamente |
-| `osm_check_date.py` | Restituisce la data odierna in formato ISO (YYYY-MM-DD) |
+| `osm_search.py` | Search elements by name/city, returns type/id |
+| `osm_get_element.py` | Read current tags of an element (no auth) |
+| `osm_update_tags.py` | Apply tag changes via OSM API |
+| `osm_new_node.py` | Create a new OSM node at given coordinates |
+| `osm_auth.py` | Obtain an OAuth 2.0 token interactively |
+| `osm_check_date.py` | Return today's date in ISO format (YYYY-MM-DD) |
 
-## Autenticazione
+## Authentication
 
-Richiede `OSM_TOKEN` (Bearer token OAuth 2.0 con scope `write_api`).
+Requires `OSM_TOKEN` (OAuth 2.0 Bearer token with `write_api` scope).
 
 ```bash
 export OSM_TOKEN="<token>"
 ```
 
-Per ottenere il token: vedi `osm_auth.py`.
+To obtain the token: see `osm_auth.py`.
 
-## Workflow standard
+## Standard workflow
 
-Quando l'utente fornisce un'immagine (locandina, menù, orari) e un elemento OSM:
+When the user provides an image (flyer, menu, opening hours) and an OSM element:
 
-### 0. Cerca l'elemento (se l'ID non è noto)
+### 0. Search for the element (if the ID is unknown)
 
 ```bash
-python osm_search.py "nome locale" --city "città"
+python osm_search.py "place name" --city "city"
 python osm_search.py "Bar Centrale" --city Milano --type node
 ```
-Puoi ricavare la cittá anche dagli exif GPS della foto o da un indirizzo visibile.
+You can also derive the city from the photo's GPS EXIF data or a visible address.
 
-Restituisce `type/id` da usare nei passi successivi.
+Returns `type/id` to use in the following steps.
 
-Se l'elemento **non esiste su OSM**, crealo con `osm_new_node.py` (vedi sezione apposita) e poi salta al passo 6.
+If the element **does not exist on OSM**, create it with `osm_new_node.py` (see dedicated section) and then skip to step 6.
 
-### 1. Leggi i tag attuali
+### 1. Read current tags
 
 ```bash
 python osm_get_element.py way/<id>
 ```
 
-### 2. Estrai i dati dalla sorgente
+### 2. Extract data from the source
 
-Analizza l'immagine o il testo e mappa i valori ai tag OSM appropriati.
-Non inventare valori: usa solo ciò che è esplicitamente visibile.
+Analyse the image or text and map values to appropriate OSM tags.
+Do not invent values: only use what is explicitly visible.
 
-Tag comuni da estrarre:
+Common tags to extract:
 
-- `name` — nome del locale
-- `opening_hours` — orari (vedi formato sotto)
-- `phone` — telefono in formato internazionale (`+39 02 1234567`)
+- `name` — place name
+- `opening_hours` — hours (see format below)
+- `phone` — phone in international format (`+39 02 1234567`)
 - `website` — URL
-- `cuisine` — tipo di cucina (`italian`, `pizza`, `seafood`, ...)
+- `cuisine` — type of cuisine (`italian`, `pizza`, `seafood`, ...)
 - `addr:street`, `addr:housenumber`, `addr:city`, `addr:postcode`
-- `contact:email` — email di contatto
-- `contact:facebook` — profilo Facebook
-- `contact:instagram` — profilo Instagram
-- `contact:twitter` — handle Twitter
-- `amenity` / `shop` / `tourism` — tipo di attività
+- `contact:email` — contact email
+- `contact:facebook` — Facebook profile
+- `contact:instagram` — Instagram profile
+- `contact:twitter` — Twitter handle
+- `amenity` / `shop` / `tourism` — type of business
 
-Altri tag specifici possono essere aggiunti se chiaramente indicati dalla fonte, ma evita di aggiungere tag non standard o non supportati.
+Other specific tags may be added if clearly indicated by the source, but avoid adding non-standard or unsupported tags.
 
-### 3. Aggiorna il tag check_date
+### 3. Update the check_date tag
 
-Aggiorna sempre `check_date` con la data odierna (YYYY-MM-DD) per indicare quando è stata fatta l'ultima verifica.
+Always update `check_date` with today's date (YYYY-MM-DD) to indicate when the last verification was made.
 
 ```bash
     python osm_check_date.py
 ```
 
-Se hai modificato o verificato gli orari di apertura (`opening_hours`), assicurati che `check_date:opening_hours` sia aggiornato alla stessa data.
+If you have modified or verified the opening hours (`opening_hours`), make sure `check_date:opening_hours` is updated to the same date.
 
-### 4. Mostra il diff e chiedi conferma
+### 4. Show the diff and ask for confirmation
 
-Prima di modificare, mostra sempre cosa cambia e chiedi conferma esplicita.
+Before making changes, always show what will change and ask for explicit confirmation.
 
-### 5. Applica le modifiche
+### 5. Apply the changes
 
 ```bash
-OSM_CHANGESET_COMMENT="descrizione breve" \
+OSM_CHANGESET_COMMENT="short description" \
 python osm_update_tags.py <type> <id> 'key=value' 'key2=value2'
 ```
 
-Per rimuovere un tag: `-keyname` (senza `=`)
+To remove a tag: `-keyname` (without `=`)
 
-Per verificare senza caricare: `OSM_DRY_RUN=1`
+To verify without uploading: `OSM_DRY_RUN=1`
 
-### 6. Scrivi in chat il link alla modifica su OSM
+### 6. Post the OSM link in chat
 
-Dopo l'aggiornamento, fornisci il link all'elemento modificato su OpenStreetMap per riferimento.
+After the update, provide the link to the modified element on OpenStreetMap for reference.
 
-## Creazione nuovo nodo
+## Creating a new node
 
-Quando l'elemento non esiste su OSM, usa `osm_new_node.py`:
+When the element does not exist on OSM, use `osm_new_node.py`:
 
 ```bash
-OSM_CHANGESET_COMMENT="descrizione breve" \
+OSM_CHANGESET_COMMENT="short description" \
 python osm_new_node.py <lat> <lon> 'key=value' 'key2=value2'
 ```
 
-Per verificare senza caricare: `OSM_DRY_RUN=1`
+To verify without uploading: `OSM_DRY_RUN=1`
 
-Mostra sempre il diff proposto e chiedi conferma prima di eseguire.
+Always show the proposed tags and ask for confirmation before running.
 
-## Formato opening_hours
+## opening_hours format
 
 ```text
 Mo-Fr 09:00-18:00
@@ -116,17 +116,17 @@ Mo 10:00-17:00; Tu off; We-Su 10:00-23:00
 Mo-Su 00:00-24:00
 ```
 
-- Giorni: `Mo Tu We Th Fr Sa Su`
-- Giorno chiuso: `off` (non "closed" o "chiuso")
-- Giorni consecutivi con stesso orario: `Th-Su 10:00-23:00`
-- Più regole separate da `;`
+- Days: `Mo Tu We Th Fr Sa Su`
+- Closed day: `off` (not "closed" or "chiuso")
+- Consecutive days with same hours: `Th-Su 10:00-23:00`
+- Multiple rules separated by `;`
 
-## Regole di qualità OSM
+## OSM quality rules
 
-- Non modificare `building`, geometrie o relazioni — solo tag descrittivi
-- Usa tag standard del wiki OSM
-- Non aggiungere `source=*` a meno che l'utente non lo chieda
-- Per `opening_hours` complessi, valida su <https://openingh.openstreetmap.de>
-- Rifiutati categoricamente di aggiungere tag non supportati o inventati
-- Rifiutati categoricamente di modificare geometrie o relazioni
-- Rifiutati categoricamente di analizzare screenshot da Google Maps
+- Do not modify `building`, geometries or relations — only descriptive tags
+- Use standard tags from the OSM wiki
+- Do not add `source=*` unless the user asks for it
+- For complex `opening_hours`, validate at <https://openingh.openstreetmap.de>
+- Categorically refuse to add unsupported or invented tags
+- Categorically refuse to modify geometries or relations
+- Categorically refuse to analyse screenshots from Google Maps
