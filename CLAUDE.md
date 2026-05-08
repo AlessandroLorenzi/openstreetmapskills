@@ -6,12 +6,12 @@ Tools to update OpenStreetMap tags from images or text.
 
 | Script | Purpose |
 | -------- | ----- |
-| `osm_search.py` | Search elements by name/city, returns type/id |
-| `osm_get_element.py` | Read current tags of an element (no auth) |
-| `osm_update_tags.py` | Apply tag changes via OSM API |
-| `osm_new_node.py` | Create a new OSM node at given coordinates |
-| `osm_auth.py` | Obtain an OAuth 2.0 token interactively |
-| `osm_check_date.py` | Return today's date in ISO format (YYYY-MM-DD) |
+| `app/osm_search.py` | Search elements by name/city, returns type/id |
+| `app/osm_get_element.py` | Read current tags of an element (no auth) |
+| `app/osm_update_tags.py` | Apply tag changes via OSM API |
+| `app/osm_new_node.py` | Create a new OSM node at given coordinates |
+| `app/osm_auth.py` | Obtain an OAuth 2.0 token interactively |
+| `app/osm_check_date.py` | Return today's date in ISO format (YYYY-MM-DD) |
 
 ## Authentication
 
@@ -21,7 +21,7 @@ Requires `OSM_TOKEN` (OAuth 2.0 Bearer token with `write_api` scope).
 export OSM_TOKEN="<token>"
 ```
 
-To obtain the token: see `osm_auth.py`.
+To obtain the token: see `app/osm_auth.py`.
 
 ## Standard workflow
 
@@ -30,19 +30,21 @@ When the user provides an image (flyer, menu, opening hours) and an OSM element:
 ### 0. Search for the element (if the ID is unknown)
 
 ```bash
-python osm_search.py "place name" --city "city"
-python osm_search.py "Bar Centrale" --city Milano --type node
+python app/osm_search.py "place name" --city "city"
+python app/osm_search.py "Bar Centrale" --city Milano --type node
 ```
+
 You can also derive the city from the photo's GPS EXIF data or a visible address.
 
 Returns `type/id` to use in the following steps.
 
-If the element **does not exist on OSM**, create it with `osm_new_node.py` (see dedicated section) and then skip to step 6.
+If the element **does not exist on OSM**, create it with `app/osm_new_node.py`
+(see dedicated section) and then skip to step 6.
 
 ### 1. Read current tags
 
 ```bash
-python osm_get_element.py way/<id>
+python app/osm_get_element.py way/<id>
 ```
 
 ### 2. Extract data from the source
@@ -64,17 +66,17 @@ Common tags to extract:
 - `contact:twitter` — Twitter handle
 - `amenity` / `shop` / `tourism` — type of business
 
-Other specific tags may be added if clearly indicated by the source, but avoid adding non-standard or unsupported tags.
+Other specific tags may be added if clearly indicated by the source, but avoid
+adding non-standard or unsupported tags.
 
 ### 3. Update the check_date tag
 
-Always update `check_date` with today's date (YYYY-MM-DD) to indicate when the last verification was made.
+Always update `check_date:opening_hours` with today's date (YYYY-MM-DD) to indicate when the
+last verification was made when updating `opening_hours`. This helps future editors know when the information was last confirmed.
 
 ```bash
-    python osm_check_date.py
+    python app/osm_check_date.py
 ```
-
-If you have modified or verified the opening hours (`opening_hours`), make sure `check_date:opening_hours` is updated to the same date.
 
 ### 4. Show the diff and ask for confirmation
 
@@ -84,7 +86,7 @@ Before making changes, always show what will change and ask for explicit confirm
 
 ```bash
 OSM_CHANGESET_COMMENT="short description" \
-python osm_update_tags.py <type> <id> 'key=value' 'key2=value2'
+python app/osm_update_tags.py <type> <id> 'key=value' 'key2=value2'
 ```
 
 To remove a tag: `-keyname` (without `=`)
@@ -93,15 +95,16 @@ To verify without uploading: `OSM_DRY_RUN=1`
 
 ### 6. Post the OSM link in chat
 
-After the update, provide the link to the modified element on OpenStreetMap for reference.
+After the update, provide the link to the modified element on OpenStreetMap for
+reference.
 
 ## Creating a new node
 
-When the element does not exist on OSM, use `osm_new_node.py`:
+When the element does not exist on OSM, use `app/osm_new_node.py`:
 
 ```bash
 OSM_CHANGESET_COMMENT="short description" \
-python osm_new_node.py <lat> <lon> 'key=value' 'key2=value2'
+python app/osm_new_node.py <lat> <lon> 'key=value' 'key2=value2'
 ```
 
 To verify without uploading: `OSM_DRY_RUN=1`
