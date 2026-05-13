@@ -115,13 +115,13 @@ def _fetch_element(elem_type: str, elem_id: int) -> dict:
 
 
 def _create_changeset(comment: str, headers: dict) -> int:
-    xml = (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        '<osm><changeset>'
-        f'<tag k="created_by" v="{CREATED_BY}"/>'
-        f'<tag k="comment" v="{comment}"/>'
-        '</changeset></osm>'
-    )
+    root = ET.Element("osm")
+    cs = ET.SubElement(root, "changeset")
+    for k, v in (("created_by", CREATED_BY), ("comment", comment)):
+        t = ET.SubElement(cs, "tag")
+        t.set("k", k)
+        t.set("v", v)
+    xml = '<?xml version="1.0" encoding="UTF-8"?>' + ET.tostring(root, encoding="unicode")
     req = Request(
         f"{API_URL}/api/0.6/changeset/create",
         data=xml.encode(),
