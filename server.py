@@ -8,7 +8,7 @@ from datetime import date
 from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
-from fastmcp import FastMCP
+from fastmcp import FastMCP, Context
 
 mcp = FastMCP(
     "OSM Tools",
@@ -95,8 +95,18 @@ CREATED_BY = "https://github.com/AlessandroLorenzi/openstreetmapskills"
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-def _auth_headers() -> dict:
-    token = os.environ.get("OSM_TOKEN")
+def _token_from_context(ctx: Context) -> str | None:
+    try:
+        auth = ctx.request_context.request.headers.get("authorization", "")
+        if auth.lower().startswith("bearer "):
+            return auth[7:].strip()
+    except (AttributeError, TypeError):
+        pass
+    return None
+
+
+def _auth_headers(token: str | None = None) -> dict:
+    token = token or os.environ.get("OSM_TOKEN")
     if token:
         return {"Authorization": f"Bearer {token}"}
     user = os.environ.get("OSM_USER")
@@ -105,7 +115,7 @@ def _auth_headers() -> dict:
         import base64
         creds = base64.b64encode(f"{user}:{pwd}".encode()).decode()
         return {"Authorization": f"Basic {creds}"}
-    raise RuntimeError("Set OSM_TOKEN or OSM_USER+OSM_PASS environment variables")
+    raise RuntimeError("Provide OSM_TOKEN via Authorization header or OSM_TOKEN env var")
 
 
 def _fetch_element(elem_type: str, elem_id: int) -> dict:
@@ -264,6 +274,7 @@ def update_osm_tags(
     remove: list[str] | None = None,
     changeset_comment: str = "",
     dry_run: bool = False,
+    ctx: Context = None,
 ) -> str:
     """Update tags on an OSM element. Requires OSM_TOKEN environment variable.
 
@@ -311,7 +322,7 @@ def update_osm_tags(
     if dry_run:
         return f"DRY RUN — no upload.\n\n{diff_output}"
 
-    headers = _auth_headers()
+    headers = _auth_headers(_token_from_context(ctx) if ctx else None)
     comment = changeset_comment or f"Tag update via {CREATED_BY}"
     changeset_id = _create_changeset(comment, headers)
 
@@ -344,6 +355,7 @@ def create_osm_node(
     tags: dict[str, str],
     changeset_comment: str = "",
     dry_run: bool = False,
+    ctx: Context = None,
 ) -> str:
     """Create a new OSM node at the given coordinates. Requires OSM_TOKEN environment variable.
 
@@ -372,7 +384,7 @@ def create_osm_node(
         xml = '<?xml version="1.0" encoding="UTF-8"?>' + ET.tostring(root, encoding="unicode")
         return f"DRY RUN — no upload.\n\n{preview}\n\nXML:\n{xml}"
 
-    headers = _auth_headers()
+    headers = _auth_headers(_token_from_context(ctx) if ctx else None)
     comment = changeset_comment or f"Add node via {CREATED_BY}"
     changeset_id = _create_changeset(comment, headers)
 
