@@ -42,20 +42,22 @@ export OSM_TOKEN="<token>"
 
 ### 3. Register the MCP server in Claude Code
 
-Add to `~/.claude/mcp.json`:
+**Option A — hosted (no local install needed):**
 
-```json
-{
-  "mcpServers": {
-    "osm": {
-      "command": "python",
-      "args": ["/path/to/openstreetmapskills/server.py"],
-      "env": {
-        "OSM_TOKEN": "<your-token>"
-      }
-    }
-  }
-}
+```bash
+claude mcp add --transport http osm https://osm-mcp.fastmcp.app/mcp \
+  --header "X-OSM-Token: <your-osm-token>"
+```
+
+The hosted server runs on [Prefect](https://horizon.prefect.io) and requires
+a Prefect account for the OAuth login that Claude Code will prompt.
+
+**Option B — local:**
+
+```bash
+pip install fastmcp
+claude mcp add osm -e OSM_TOKEN=<your-osm-token> -- \
+  python /path/to/openstreetmapskills/server.py
 ```
 
 ## Available tools

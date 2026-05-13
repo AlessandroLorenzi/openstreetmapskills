@@ -97,7 +97,7 @@ CREATED_BY = "https://github.com/AlessandroLorenzi/openstreetmapskills"
 
 def _token_from_context(ctx: Context) -> str | None:
     try:
-        osm_token = ctx.request_context.request.headers.get("osm_token", "")
+        osm_token = ctx.request_context.request.headers.get("x-osm-token", "")
         if osm_token:
             return osm_token
     except (AttributeError, TypeError):
