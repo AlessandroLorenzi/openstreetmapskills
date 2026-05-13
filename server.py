@@ -261,7 +261,7 @@ def update_osm_tags(
     elem_type: str,
     elem_id: int,
     tags: dict[str, str],
-    remove: list[str] = [],
+    remove: list[str] | None = None,
     changeset_comment: str = "",
     dry_run: bool = False,
 ) -> str:
@@ -281,7 +281,7 @@ def update_osm_tags(
     old_tags = dict(element["tags"])
 
     new_tags = {**old_tags, **tags}
-    for k in remove:
+    for k in (remove or []):
         new_tags.pop(k, None)
 
     all_keys = sorted(set(old_tags) | set(new_tags))
