@@ -1,74 +1,76 @@
 # OSM Tag Updater
 
-Update OpenStreetMap tags from images or text, using Claude Code.
+Update OpenStreetMap tags from images or text using an MCP server and Claude.
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.11+
+- [fastmcp](https://github.com/jlowin/fastmcp) (`pip install fastmcp`)
 - Account on [openstreetmap.org](https://www.openstreetmap.org)
 
-## Getting an OSM token
+## Setup
 
-### 1. Register an OAuth application
+### 1. Install dependencies
 
-Go to **openstreetmap.org → Your account → OAuth 2 Applications →
-Register new application** and fill in:
+```bash
+pip install fastmcp
+```
+
+### 2. Get an OSM token
+
+Register an OAuth application on **openstreetmap.org → Your account →
+OAuth 2 Applications → Register new application**:
 
 | Field | Value |
-| ------- | -------- |
-| Name | `claude-osm-cli` (or any name) |
+| ----- | ----- |
+| Name | `claude-osm-mcp` (or any name) |
 | Redirect URIs | `urn:ietf:wg:oauth:2.0:oob` |
 | Confidential application | leave **unchecked** |
 | Permissions | check only **Modify the map** |
 
-Click **Register** and copy the **Client ID** (the Client Secret is not needed).
-
-### 2. Generate the token
+Then generate the token:
 
 ```bash
-python osm_auth.py <CLIENT-ID>
+python app/osm_auth.py <CLIENT-ID>
 ```
 
-The script opens your browser on OSM. After clicking **Authorize**, OSM
-displays a code — paste it in the terminal. The token will be printed on screen.
-
-### 3. Export the token
+The script opens your browser, asks you to authorize, then prints the token.
 
 ```bash
 export OSM_TOKEN="<token>"
 ```
 
-To make it permanent:
+### 3. Register the MCP server in Claude Code
 
-```bash
-echo 'export OSM_TOKEN="<token>"' >> ~/.zshrc
+Add to `~/.claude/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "osm": {
+      "command": "python",
+      "args": ["/path/to/openstreetmapskills/server.py"],
+      "env": {
+        "OSM_TOKEN": "<your-token>"
+      }
+    }
+  }
+}
 ```
+
+## Available tools
+
+| Tool | Description |
+| ---- | ----------- |
+| `search_osm` | Search elements by name and city |
+| `get_osm_element` | Read current tags (no auth needed) |
+| `update_osm_tags` | Apply tag changes |
+| `create_osm_node` | Create a new node at given coordinates |
+| `get_today_date` | Return today's date in ISO format |
 
 ## Usage
 
-```bash
-# Search for an element by name
-python osm_search.py "Osteria Irma" --city Varese
-python osm_search.py "Bar Centrale" --city Milano --type node
-
-# Read the current tags of an element
-python osm_get_element.py way/154386826
-
-# Update tags (shows diff and asks for confirmation)
-OSM_CHANGESET_COMMENT="Update opening_hours" \
-python osm_update_tags.py way 154386826 \
-  'opening_hours=Mo 10:00-17:00; Tu off; We 10:00-17:00; Th-Su 10:00-23:00'
-
-# Dry run without uploading
-OSM_DRY_RUN=1 python osm_update_tags.py way 154386826 'name=New Name'
-
-# Remove a tag
-python osm_update_tags.py way 154386826 -old_tag
-```
-
-## Usage with Claude Code
-
-Open Claude Code in this directory and describe what you want to update,
-attaching an image or text with the relevant information. Claude reads the
-current tags, extracts values from the source, and proposes changes before
-applying them.
+Once the MCP server is registered, open Claude and describe what you want to
+update, attaching an image or text (flyer, menu, opening hours sign). Claude
+will search for the element, read its current tags, propose changes, and ask
+for confirmation before applying them.
