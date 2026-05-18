@@ -1,4 +1,4 @@
-# OSM Tag Updater
+# osm-mcp
 
 Update OpenStreetMap tags from images or text using an MCP server and Claude.
 
@@ -57,7 +57,7 @@ a Prefect account for the OAuth login that Claude Code will prompt.
 ```bash
 pip install fastmcp
 claude mcp add osm -e OSM_TOKEN=<your-osm-token> -- \
-  python /path/to/openstreetmapskills/server.py
+  python /path/to/osm-mcp/server.py
 ```
 
 ## Available tools

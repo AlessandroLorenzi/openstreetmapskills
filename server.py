@@ -88,7 +88,7 @@ Mo-Su 00:00-24:00
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 API_URL = os.environ.get("OSM_API_URL", "https://api.openstreetmap.org")
-CREATED_BY = "https://github.com/AlessandroLorenzi/openstreetmapskills"
+CREATED_BY = "https://github.com/AlessandroLorenzi/osm-mcp"
 
 
 # ---------------------------------------------------------------------------
